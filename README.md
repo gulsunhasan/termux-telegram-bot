@@ -4,6 +4,8 @@ Bilgisayar yok, sunucu parası yok. Eski bir Android telefon ya da tablet + Term
 
 > 🇬🇧 *A ready-to-use Turkish Telegram bot template that runs 24/7 on an Android phone with Termux — notes, reminders, exchange rates, auto-restart and auto-start on boot.*
 
+<p align="center"><img src="assets/bot-ekran.jpg" width="320" alt="Bot ekranı"></p>
+
 ## ✨ Özellikler
 
 | Komut | Ne yapar |
