@@ -184,6 +184,127 @@ def station():
     o.append(f'<rect width="{W}" height="{H}" fill="url(#vig)"/>')
     return "\n".join(o)
 
+def kabin(pal="kirmizi", with_yolcu=False):
+    """Makinist kabini: ön cam, tünel rayları, kumanda paneli, boş koltuk."""
+    p = PAL[pal]
+    red = pal == "kirmizi"
+    o = [defs(p), f'<rect width="{W}" height="{H}" fill="{"#100303" if red else "#0a1119"}"/>']
+    # ön cam (tünel)
+    o.append(f'<path d="M60,260 L1020,260 L980,980 L100,980 Z" fill="#020304" stroke="{p["pole"]}" stroke-width="14"/>')
+    vx, vy = 540, 560
+    o.append(f'<circle cx="{vx}" cy="{vy}" r="60" fill="{"#ff3a1a" if red else "#9fd3ff"}" opacity="0.35" filter="url(#blur20)"/>')
+    for i in range(-5, 6):
+        o.append(f'<line x1="{vx}" y1="{vy}" x2="{vx + i*190}" y2="980" stroke="#1a1f26" stroke-width="2"/>')
+    for x2 in (360, 720):
+        o.append(f'<line x1="{vx + (x2-540)*0.02}" y1="{vy}" x2="{x2}" y2="980" stroke="#8a96a3" stroke-width="7"/>')
+    for k in range(1, 9):
+        y = vy + (980 - vy) * (k / 9) ** 1.8
+        hw = (y - vy) / (980 - vy) * 260
+        o.append(f'<line x1="{vx-hw}" y1="{y:.0f}" x2="{vx+hw}" y2="{y:.0f}" stroke="#2b2f36" stroke-width="{2+k}"/>')
+    # tünel duvar lambaları
+    for k in range(1, 7):
+        t = (k / 7) ** 1.6
+        for sx in (-1, 1):
+            x = vx + sx * (40 + t * 430); y = vy - 40 + t * 120
+            o.append(f'<circle cx="{x:.0f}" cy="{y:.0f}" r="{3+t*14:.0f}" fill="{"#ff5a3a" if red else "#ffd98a"}" opacity="0.8"/>')
+    o.append('<path d="M60,260 L1020,260 L980,980 L100,980 Z" fill="#fff" opacity="0.04"/>')
+    o.append('<line x1="120" y1="300" x2="420" y2="940" stroke="#fff" stroke-width="10" opacity="0.05"/>')
+    # panel
+    o.append(f'<path d="M0,960 L1080,960 L1080,1920 L0,1920 Z" fill="{"#1c0707" if red else "#141c26"}"/>')
+    o.append(f'<path d="M0,960 L1080,960 L1000,1120 L80,1120 Z" fill="{"#2c0b0b" if red else "#1f2b38"}"/>')
+    # ekranlar
+    for x, txt in ((150, "YÖN: GERİ"), (600, "OTOMATİK")):
+        o.append(f'<rect x="{x}" y="1000" width="330" height="100" rx="8" fill="#020a04" stroke="#333" stroke-width="4"/>')
+        o.append(f'<text x="{x+165}" y="1068" font-family="DejaVu Sans Mono" font-weight="bold" font-size="40" fill="{"#ff4a3a" if red else "#38ff7a"}" text-anchor="middle">{txt}</text>')
+    # düğmeler
+    for i in range(8):
+        c = ["#ff3030", "#ffb020", "#30d060", "#3080ff"][i % 4]
+        o.append(f'<circle cx="{170 + i*105}" cy="1180" r="22" fill="{c}" opacity="0.9"/>')
+    # kumanda kolu
+    o.append('<rect x="760" y="1220" width="40" height="200" rx="18" fill="#555"/><circle cx="780" cy="1215" r="42" fill="#d22"/>')
+    # boş koltuk
+    o.append(f'<path d="M300,1300 Q300,1240 360,1240 L560,1240 Q620,1240 620,1300 L620,1700 L300,1700 Z" fill="{p["seat2"]}"/>')
+    o.append(f'<path d="M260,1640 L660,1640 L640,1760 L280,1760 Z" fill="{p["seat"]}"/>')
+    o.append('<rect x="440" y="1760" width="40" height="160" fill="#222"/>')
+    if with_yolcu:
+        o.append(yolcu(780, 1920, 0.78, back=True))
+    if red:
+        o.append(f'<circle cx="{CX}" cy="130" r="150" fill="#ff1a1a" filter="url(#blur20)" opacity="0.6"/>')
+        o.append(f'<rect x="{CX-60}" y="90" width="120" height="40" rx="10" fill="#ff3030"/>')
+    o.append(f'<rect width="{W}" height="{H}" fill="{p["amb"]}"/>')
+    o.append(f'<rect width="{W}" height="{H}" fill="url(#vig)"/>')
+    return "\n".join(o)
+
+def ekran():
+    """Kabin ekranı yakın plan."""
+    p = PAL["mavi"]
+    o = [defs(p), f'<rect width="{W}" height="{H}" fill="#070b10"/>']
+    o.append('<rect x="60" y="560" width="960" height="560" rx="30" fill="#0c1218" stroke="#3a4a5a" stroke-width="12"/>')
+    o.append('<rect x="100" y="600" width="880" height="480" rx="10" fill="#010803"/>')
+    for yy in range(606, 1076, 10):
+        o.append(f'<line x1="104" y1="{yy}" x2="976" y2="{yy}" stroke="#000" stroke-width="3" opacity="0.5"/>')
+    lines = [("OTOMATİK MOD", "#38ff7a", 60, 700), ("YÖN: ◀◀ GERİ", "#ff5a3a", 66, 820), ("HEDEF: ??????", "#38ff7a", 56, 930), ("SÜRÜCÜ: YOK", "#38ff7a", 44, 1030)]
+    for t, c, fs, y in lines:
+        o.append(f'<text x="540" y="{y}" font-family="DejaVu Sans Mono" font-weight="bold" font-size="{fs}" fill="{c}" text-anchor="middle" letter-spacing="3">{t}</text>')
+    o.append('<rect x="100" y="600" width="880" height="480" fill="#38ff7a" opacity="0.05" filter="url(#blur20)"/>')
+    o.append(f'<rect width="{W}" height="{H}" fill="url(#vig)"/>')
+    return "\n".join(o)
+
+def telsiz(red=False):
+    """Telsiz ahizesi yakın plan, kanal ekranı, ses dalgası."""
+    p = PAL["kirmizi" if red else "mavi"]
+    o = [defs(p), f'<rect width="{W}" height="{H}" fill="{"#120404" if red else "#0a1017"}"/>']
+    o.append('<path d="M540,330 Q700,300 700,420" stroke="#222" stroke-width="18" fill="none"/>')
+    o.append('<rect x="300" y="420" width="480" height="1180" rx="80" fill="#1b1e22" stroke="#3a3f46" stroke-width="10"/>')
+    o.append('<rect x="370" y="520" width="340" height="170" rx="14" fill="#1a1000"/>')
+    o.append(f'<text x="540" y="590" font-family="DejaVu Sans Mono" font-weight="bold" font-size="40" fill="#ffa21a" text-anchor="middle">KANAL 7</text>')
+    o.append(f'<text x="540" y="655" font-family="DejaVu Sans Mono" font-weight="bold" font-size="34" fill="#ffa21a" text-anchor="middle">◉ ALIYOR</text>')
+    for r in range(0, 9):
+        for c in range(0, 6):
+            o.append(f'<circle cx="{400 + c*56}" cy="{800 + r*56}" r="14" fill="#08090a"/>')
+    o.append('<rect x="250" y="900" width="60" height="260" rx="20" fill="#2a2e33"/>')
+    col = "#ff3b3b" if red else "#7fc8ff"
+    import math
+    for side in (-1, 1):
+        pts = " ".join(f"{540 + side*(330 + k*12):.0f},{1100 + math.sin(k*1.3)*(40+k*6) * (1 if k%2 else -1):.0f}" for k in range(16))
+        o.append(f'<polyline points="{pts}" fill="none" stroke="{col}" stroke-width="6" opacity="0.8"/>')
+    o.append(f'<circle cx="540" cy="580" r="220" fill="#ffa21a" opacity="0.08" filter="url(#blur20)"/>')
+    if red:
+        o.append(f'<circle cx="{CX}" cy="150" r="160" fill="#ff1a1a" filter="url(#blur20)" opacity="0.6"/>')
+    o.append(f'<rect width="{W}" height="{H}" fill="url(#vig)"/>')
+    return "\n".join(o)
+
+def secim2():
+    """2. bölüm seçimi: A acil fren kolu, B telsiz."""
+    p = PAL["kirmizi"]
+    o = [defs(p), f'<rect width="{W}" height="{H}" fill="#120404"/>']
+    for x, lab in ((70, "A"), (590, "B")):
+        o.append(f'<rect x="{x}" y="420" width="420" height="1080" rx="18" fill="#1e0707" stroke="#5a1a1a" stroke-width="8"/>')
+        o.append(f'<circle cx="{x+210}" cy="1340" r="95" fill="#000" opacity="0.6"/>')
+        o.append(f'<text x="{x+210}" y="1385" font-family="Anton" font-size="140" fill="#fff" text-anchor="middle">{lab}</text>')
+    # A: acil fren
+    x = 70
+    o.append(f'<rect x="{x+90}" y="560" width="240" height="120" rx="10" fill="#ffd400"/>')
+    o.append(f'<text x="{x+210}" y="606" font-family="Oswald" font-weight="700" font-size="36" fill="#000" text-anchor="middle">ACİL</text>')
+    o.append(f'<text x="{x+210}" y="656" font-family="Oswald" font-weight="700" font-size="36" fill="#000" text-anchor="middle">FREN</text>')
+    o.append(f'<rect x="{x+185}" y="720" width="50" height="330" rx="22" fill="#888"/>')
+    o.append(f'<rect x="{x+110}" y="1010" width="200" height="90" rx="40" fill="#e01010"/>')
+    o.append(f'<circle cx="{x+210}" cy="1060" r="160" fill="#ff2020" opacity="0.15" filter="url(#blur20)"/>')
+    # B: telsiz
+    x = 590
+    o.append(f'<rect x="{x+130}" y="560" width="160" height="460" rx="40" fill="#1b1e22" stroke="#444" stroke-width="6"/>')
+    o.append(f'<rect x="{x+150}" y="600" width="120" height="70" rx="8" fill="#1a1000"/>')
+    o.append(f'<text x="{x+210}" y="648" font-family="DejaVu Sans Mono" font-weight="bold" font-size="30" fill="#ffa21a" text-anchor="middle">CH 7</text>')
+    for r in range(5):
+        for c in range(3):
+            o.append(f'<circle cx="{x+170+c*40}" cy="{730+r*48}" r="10" fill="#000"/>')
+    o.append(f'<path d="M{x+300},640 q40,60 0,120 M{x+330},610 q70,90 0,180" stroke="#ffa21a" stroke-width="7" fill="none" opacity="0.8"/>')
+    o.append(f'<circle cx="{CX}" cy="180" r="160" fill="#ff1a1a" filter="url(#blur20)" opacity="0.7"/>')
+    o.append(f'<rect x="{CX-70}" y="140" width="140" height="44" rx="10" fill="#ff3030"/>')
+    o.append(yolcu(CX, 1890, 0.62, back=True))
+    o.append(f'<rect width="{W}" height="{H}" fill="url(#vig)"/>')
+    return "\n".join(o)
+
 SCENES = {
     "vagon_mavi": lambda: car("mavi"),
     "vagon_kirmizi": lambda: car("kirmizi", lights_on=False),
@@ -192,4 +313,12 @@ SCENES = {
     "anons": anons,
     "durak": station,
     "kapilar": doors,
+    "kabin_kirmizi": lambda: kabin("kirmizi"),
+    "kabin_mavi": lambda: kabin("mavi"),
+    "kabin_yolcu": lambda: kabin("mavi", True),
+    "kabin_yolcu_kirmizi": lambda: kabin("kirmizi", True),
+    "ekran": ekran,
+    "telsiz": lambda: telsiz(False),
+    "telsiz_kirmizi": lambda: telsiz(True),
+    "secim2": secim2,
 }
