@@ -3,7 +3,7 @@ import os, sys, json, base64, subprocess
 D = os.path.dirname(os.path.abspath(__file__)); os.chdir(D); sys.path.insert(0, D)
 from scenes_a import SCENES, W, H
 from playwright.sync_api import sync_playwright
-def _b(n): return "data:font/ttf;base64," + base64.b64encode(open(f"fonts/{n}", "rb").read()).decode()
+def _b(n): return "data:font/ttf;base64," + base64.b64encode(open(f"../son-vagon/fonts/{n}", "rb").read()).decode()
 FONTS = f"@font-face{{font-family:Anton;src:url({_b('Anton.ttf')});}}@font-face{{font-family:Oswald;font-weight:200 700;src:url({_b('Oswald.ttf')});}}"
 NARR = [
  ("a01","dawn","25 NİSAN<br>1915","Sabah saat 05.30","25 Nisan 1915. Sabah saat beş buçuk."),
