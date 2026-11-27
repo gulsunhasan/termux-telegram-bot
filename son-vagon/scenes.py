@@ -322,3 +322,54 @@ SCENES = {
     "telsiz_kirmizi": lambda: telsiz(True),
     "secim2": secim2,
 }
+
+def peron_yolcu():
+    """3. bölüm: tren camından peron, perondaki tek yolcu (yüzü karanlık, bize dönük)."""
+    p = PAL["mavi"]
+    o = [defs(p), f'<rect width="{W}" height="{H}" fill="#06090d"/>']
+    # peron duvarı + tabela
+    o.append('<rect x="0" y="240" width="1080" height="1100" fill="#16212c"/>')
+    for x in range(0, 1080, 90):
+        o.append(f'<rect x="{x}" y="240" width="88" height="1100" fill="#1b2835" opacity="0.6"/>')
+    o.append('<rect x="240" y="330" width="600" height="110" rx="8" fill="#0a1a4a"/>')
+    o.append('<text x="540" y="405" font-family="DejaVu Sans Mono" font-weight="bold" font-size="50" fill="#fff" text-anchor="middle">00:47  ◀ 1 SAAT</text>')
+    # tavan lambası koni
+    o.append('<path d="M540,240 L300,1500 L780,1500 Z" fill="#cfe8ff" opacity="0.10"/>')
+    o.append('<ellipse cx="540" cy="1480" rx="260" ry="40" fill="#cfe8ff" opacity="0.18" filter="url(#blur20)"/>')
+    o.append('<rect x="0" y="1340" width="1080" height="580" fill="#0e151c"/>')
+    o.append('<rect x="0" y="1340" width="1080" height="26" fill="#e8c200"/>')
+    o.append(yolcu(540, 1500, 0.95, back=False))
+    # vagon camı çerçevesi
+    o.append('<path d="M0,0 H1080 V1920 H0 Z M120,200 V1700 H960 V200 Z" fill="#0b1118" fill-rule="evenodd"/>')
+    o.append('<rect x="120" y="200" width="840" height="1500" rx="30" fill="none" stroke="#c8d3dc" stroke-width="12" opacity="0.6"/>')
+    o.append('<line x1="200" y1="260" x2="520" y2="1640" stroke="#fff" stroke-width="14" opacity="0.05"/>')
+    o.append(f'<rect width="{W}" height="{H}" fill="{p["amb"]}"/>')
+    o.append(f'<rect width="{W}" height="{H}" fill="url(#vig)"/>')
+    return "\n".join(o)
+
+def secim3():
+    """3. bölüm seçimi: A açık kapı / peron ışığı, B kilit."""
+    p = PAL["kirmizi"]
+    o = [defs(p), f'<rect width="{W}" height="{H}" fill="#120404"/>']
+    for x, lab in ((70, "A"), (590, "B")):
+        o.append(f'<rect x="{x}" y="420" width="420" height="1080" rx="18" fill="#1e0707" stroke="#5a1a1a" stroke-width="8"/>')
+        o.append(f'<circle cx="{x+210}" cy="1340" r="95" fill="#000" opacity="0.6"/>')
+        o.append(f'<text x="{x+210}" y="1385" font-family="Anton" font-size="140" fill="#fff" text-anchor="middle">{lab}</text>')
+    x = 70  # A: aralık kapı, dışarıdan soğuk ışık + küçük yolcu silüeti
+    o.append(f'<rect x="{x+60}" y="520" width="300" height="640" fill="#0a1220"/>')
+    o.append(f'<rect x="{x+150}" y="520" width="120" height="640" fill="#cfe8ff" opacity="0.55" filter="url(#blur8)"/>')
+    o.append(f'<rect x="{x+60}" y="520" width="90" height="640" fill="#2a0c0c"/><rect x="{x+270}" y="520" width="90" height="640" fill="#2a0c0c"/>')
+    o.append(f'<g opacity="0.85">{yolcu(x+210, 1110, 0.42)}</g>')
+    x = 590  # B: kilit
+    o.append(f'<path d="M{x+130},760 v-80 a80,80 0 0 1 160,0 v80" stroke="#bbb" stroke-width="34" fill="none"/>')
+    o.append(f'<rect x="{x+100}" y="760" width="220" height="200" rx="24" fill="#d8a020"/>')
+    o.append(f'<circle cx="{x+210}" cy="840" r="22" fill="#3a2a00"/><rect x="{x+200}" y="845" width="20" height="60" fill="#3a2a00"/>')
+    o.append(f'<circle cx="{x+210}" cy="860" r="170" fill="#ffb020" opacity="0.10" filter="url(#blur20)"/>')
+    o.append(f'<circle cx="{CX}" cy="180" r="160" fill="#ff1a1a" filter="url(#blur20)" opacity="0.7"/>')
+    o.append(f'<rect x="{CX-70}" y="140" width="140" height="44" rx="10" fill="#ff3030"/>')
+    o.append(yolcu(CX, 1890, 0.62, back=True))
+    o.append(f'<rect width="{W}" height="{H}" fill="url(#vig)"/>')
+    return "\n".join(o)
+
+SCENES["peron_yolcu"] = peron_yolcu
+SCENES["secim3"] = secim3
