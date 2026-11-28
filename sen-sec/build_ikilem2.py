@@ -5,7 +5,7 @@ son kartta yorum sorusu, 24-25 sn (izlenme oranı için kısa), döngüye uygun 
 import os, sys, json, subprocess, base64
 from playwright.sync_api import sync_playwright
 D = os.path.dirname(os.path.abspath(__file__)); os.chdir(D)
-cfg = json.load(open(sys.argv[1])); W, H, FPS = 1080, 1920, 30
+cfg = json.load(open(sys.argv[1])); YATAY = cfg.get("format") == "yatay"; W, H, FPS = (1920, 1080, 30) if YATAY else (1080, 1920, 30)
 T = {"gunluk": dict(bg="#0b0b12", a="linear-gradient(160deg,#ff4d4d,#b3121b)", b="linear-gradient(160deg,#3b8cff,#1240a8)", acc="#ffd400", veya="#fff", vtxt="#111"),
      "gerilim": dict(bg="radial-gradient(circle at 50% 45%,#1a0d10,#000 75%)", a="linear-gradient(160deg,#8e0c14,#2a0306)", b="linear-gradient(160deg,#0f4c5c,#031418)", acc="#ff2a2a", veya="#111", vtxt="#ff3b3b")}[cfg.get("tema","gunluk")]
 def _b(n): return "data:font/ttf;base64," + base64.b64encode(open(f"fonts/{n}", "rb").read()).decode()
@@ -22,10 +22,11 @@ body{{margin:0;width:{W}px;height:{H}px;overflow:hidden;background:{T['bg']};col
 .ghost{{opacity:.0}}
 .big{{position:absolute;top:470px;left:60px;right:60px;text-align:center;font:400 150px/1.02 Anton;text-shadow:0 8px 0 #000}}
 .mid{{position:absolute;top:1000px;left:70px;right:70px;text-align:center;font:500 60px/1.3 Oswald}}"""
+if YATAY: CSS += """.top{top:30px;font-size:56px}.tag{top:110px}.panel{top:180px!important;height:760px;width:820px}.a{left:60px;right:auto}.b{left:auto;right:60px}.opt{font-size:100px}.veya{top:450px;width:200px;height:200px;line-height:200px}.cnt{top:960px;width:100px;height:100px}.big{top:180px}.mid{top:560px}"""
 R = cfg["rounds"]; N = len(R)
 def page(i, show_b):
     a, sa, b, sb = R[i]
-    top = "5 ZOR SEÇİM · 4 SANİYEN VAR" if i == 0 else f"{i+1} / {N}"
+    top = (cfg.get("baslik") or f"{N} ZOR SEÇİM · 4 SANİYEN VAR") if i == 0 else f"{i+1} / {N}"
     bcls = "panel b" if show_b else "panel b ghost"
     return (f"<html><head><meta charset='utf-8'><style>{CSS}</style></head><body><div class='top'>{top}</div>"
             + (f"<div class='tag'>{cfg.get('ust','SEN SEÇ TV')}</div>" if i == 0 else "")
@@ -45,12 +46,12 @@ PRE, RD, OUT = 0.5, 4.0, 2.6   # A tek başına 0.5 sn, sonra B gelir + 4 sn say
 clips = []
 def clip(img, d, extra="", name=None):
     fr = round(d * FPS); out = f"tmp2/{name}.mp4"
-    vf = f"scale=2160:3840,zoompan=z='1+0.03*on/{fr}':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d={fr}:s=1080x1920:fps={FPS}{extra},format=yuv420p"
+    vf = f"scale={W*2}:{H*2},zoompan=z='1+0.03*on/{fr}':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d={fr}:s={W}x{H}:fps={FPS}{extra},format=yuv420p"
     subprocess.run(["ffmpeg","-hide_banner","-loglevel","error","-y","-loop","1","-i",img,"-vf",vf,"-frames:v",str(fr),"-r",str(FPS),"-c:v","libx264","-preset","veryfast","-crf","18",out],check=True)
     clips.append(out)
 for i in range(N):
     clip(f"tmp2/r{i}a.png", PRE, name=f"c{i}a")
-    clip(f"tmp2/r{i}b.png", RD, extra=(f",drawtext=fontfile=fonts/Anton.ttf:text='%{{eif\\:ceil({RD}-t)\\:d}}':fontsize=96:fontcolor=black:x=(w-tw)/2:y=1725-th/2"), name=f"c{i}b")
+    clip(f"tmp2/r{i}b.png", RD, extra=(f",drawtext=fontfile=fonts/Anton.ttf:text='%{{eif\\:ceil({RD}-t)\\:d}}':fontsize=96:fontcolor=black:x=(w-tw)/2:y={1010 if YATAY else 1725}-th/2"), name=f"c{i}b")
 clip("tmp2/out.png", OUT, name="cout")
 open("tmp2/list.txt","w").write("".join(f"file '{os.path.basename(c)}'\n" for c in clips))
 subprocess.run(["ffmpeg","-hide_banner","-loglevel","error","-y","-f","concat","-safe","0","-i","tmp2/list.txt","-c","copy","tmp2/raw.mp4"],check=True)
